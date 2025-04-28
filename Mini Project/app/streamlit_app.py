@@ -3,9 +3,11 @@
 import streamlit as st
 import numpy as np
 import pickle
+from pathlib import Path
 
+model_path = Path(__file__).resolve().parent / 'mlp_cnc_model.pkl'
+with open(model_path, 'rb') as f:
 # Load the saved MLP model and scaler
-with open('mlp_cnc_model.pkl', 'rb') as f:
     model, scaler = pickle.load(f)
 
 st.title('🛠️ CNC Machine Maintenance Prediction')
