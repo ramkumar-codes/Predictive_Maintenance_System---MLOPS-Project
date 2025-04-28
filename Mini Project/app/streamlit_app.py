@@ -5,7 +5,7 @@ import numpy as np
 import pickle
 
 # Load the saved MLP model and scaler
-with open('/mlp_cnc_model.pkl', 'rb') as f:
+with open('mlp_cnc_model.pkl', 'rb') as f:
     model, scaler = pickle.load(f)
 
 st.title('🛠️ CNC Machine Maintenance Prediction')
