@@ -6,10 +6,13 @@ import pickle
 from pathlib import Path
 
 # Resolve paths relative to repo root
-BASE_DIR = Path(__file__).resolve().parent.parent
-MODEL_PATH = BASE_DIR / 'model' / 'mlp_cnc_model.pkl'
+APP_DIR   = Path(__file__).resolve().parent        # .../predictive_maintenance_system/app
+PROJECT_ROOT = APP_DIR.parent                      # .../predictive_maintenance_system
 
-# Load model and scaler
+# 2. Build the absolute path to your model file
+MODEL_PATH = PROJECT_ROOT / 'model' / 'mlp_cnc_model1.pkl'
+
+# 3. Load (or error out)
 if not MODEL_PATH.exists():
     st.error(f"Model file not found at {MODEL_PATH}")
 else:
