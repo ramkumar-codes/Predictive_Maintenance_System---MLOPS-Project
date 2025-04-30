@@ -26,8 +26,9 @@ def load_data(path: str):
 
 def plot_and_log_confusion_matrix(y_true, y_pred, labels, run_id):
     cm = confusion_matrix(y_true, y_pred)
-    plt.figure(figsize=(6,5))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels)
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                xticklabels=labels, yticklabels=labels)
     plt.xlabel('Predicted')
     plt.ylabel('Actual')
     plt.title('Confusion Matrix')
@@ -41,6 +42,10 @@ def main():
     # Resolve paths relative to repo root
     base_path = Path(__file__).resolve().parent.parent
     data_path = base_path / 'data' / 'cnc_machine_data_multiclass.csv'
+    print("Loading data from:", data_path)    # debug in CI logs
+    if not data_path.exists():
+        raise FileNotFoundError(f"Data file not found at {data_path}")
+
     model_dir = base_path / 'model'
     model_dir.mkdir(exist_ok=True)
 
@@ -112,10 +117,12 @@ def main():
         with open(model_dir / 'mlp_cnc_model.pkl', 'wb') as f:
             pickle.dump((model, scaler), f)
 
-    print(f"Run completed. View details with `mlflow ui --backend-store-uri {base_path}/mlruns` under run ID {run_id}")
+    print(
+        f"Run completed. View details with:\n"
+        f"  mlflow ui --backend-store-uri {base_path}/mlruns\n"
+        f"under run ID {run_id}"
+    )
 
 
 if __name__ == '__main__':
     main()
-
-
