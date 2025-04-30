@@ -1,5 +1,5 @@
-# File: .github/workflows/ci_cd.yml
-name: CI/CD Pipeline
+# File: .github/workflows/mlflow_tracking.yml
+name: MLflow Tracking Only
 
 on:
   push:
@@ -8,10 +8,11 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  mlflow-track:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -20,44 +21,20 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install --no-cache-dir -r requirements.txt
-
-      - name: Run training
-        run: python src/train.py
-
-      - name: Run lint
         run: |
-          pip install flake8
-          flake8 .
+          pip install --no-cache-dir -r requirements.txt
 
-  docker-build-and-push:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Run training & log to MLflow
+        env:
+          # If you have a remote MLflow server, set its URI here
+          # Otherwise runs will log to ./mlruns
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+        run: |
+          python src/train.py
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      - name: Upload MLflow artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build & push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/cnc-maintenance:latest
-
-  deploy-streamlit:
-    needs: docker-build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to Streamlit Cloud
-        uses: streamlit/action@v1
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-
+          name: mlflow-runs
+          path: mlruns/
